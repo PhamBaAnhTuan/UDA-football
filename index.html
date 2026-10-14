@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="vi">
+<!-- 
+FC OTO
+FC AE25O
+Luật
+LIÊN QUÂN AE
+MK26M-K26
+FC MC
+Galacticos
+AE26N
+BA26M
+AE25N
+AE IT26M
+Đội bóng thiếu oxi
+K26 UDA
+AE26M
+BA26N
+KKT FC
+Team Ngôn Ngữ Trung
+BA25MN
+Tiếng Em
+AE24O
+-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Xếp bảng và nhánh thi đấu</title>
+    <style>
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: #eef3f6;
+            color: #183149;
+            font: 14px system-ui, Arial, sans-serif
+        }
+
+        header {
+            padding: 24px;
+            background: #103b42;
+            color: white
+        }
+
+        header h1 {
+            font-size: 25px;
+            margin: 0 0 7px
+        }
+
+        header p {
+            margin: 0;
+            color: #c7e0dd
+        }
+
+        .wrap {
+            max-width: 1500px;
+            margin: auto;
+            padding: 20px
+        }
+
+        h2 {
+            font-size: 20px;
+            margin: 0 0 10px
+        }
+
+        h3 {
+            margin: 0;
+            font-size: 16px
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #d7e2e7;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 18px
+        }
+
+        .hint {
+            color: #536b7b;
+            line-height: 1.6;
+            margin: 8px 0 14px
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 12px 0
+        }
+
+        button,
+        select,
+        textarea {
+            font: inherit
+        }
+
+        button {
+            cursor: pointer;
+            border: 1px solid #cbd9e0;
+            border-radius: 8px;
+            background: white;
+            padding: 9px 13px;
+            color: #183149
+        }
+
+        button:hover {
+            background: #eaf3f2
+        }
+
+        button.primary {
+            background: #147968;
+            color: white;
+            border-color: #147968
+        }
+
+        button:disabled {
+            opacity: .5;
+            cursor: default
+        }
+
+        textarea {
+            width: 100%;
+            height: 152px;
+            border: 1px solid #cbd9e0;
+            border-radius: 8px;
+            padding: 10px;
+            resize: vertical
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #cbd9e0;
+            border-radius: 7px;
+            background: white;
+            color: #183149
+        }
+
+        .setup {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 18px
+        }
+
+        .groups {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(135px, 1fr));
+            gap: 10px
+        }
+
+        .group {
+            background: #f4f8f9;
+            border: 1px solid #dbe5ea;
+            border-radius: 10px;
+            overflow: hidden
+        }
+
+        .group h3 {
+            background: #176d60;
+            color: white;
+            padding: 12px
+        }
+
+        .slots {
+            padding: 9px
+        }
+
+        .slot {
+            min-height: 65px;
+            border: 1px dashed #b5c8d0;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #728896;
+            font-size: 12.5px;
+            text-align: center
+        }
+
+        .slot.over,
+        #pool.over {
+            background: #d7f2e8;
+            border: 2px solid #168268
+        }
+
+        .card {
+            background: #ffffff;
+            color: #0d2136;
+            font-weight: 700;
+            font-size: 14px;
+            border: 1px solid #b8ccd6;
+            border-radius: 8px;
+            padding: 10px 11px;
+            width: 100%;
+            cursor: grab;
+            box-shadow: 0 1px 3px rgba(16, 42, 67, 0.08);
+            overflow-wrap: anywhere;
+            transition: border-color 0.15s, box-shadow 0.15s
+        }
+
+        .card:hover {
+            border-color: #176d60;
+            box-shadow: 0 2px 6px rgba(23, 109, 96, 0.18)
+        }
+
+        .card.selected {
+            outline: 3px solid #e6aa26;
+            border-color: #d49515;
+            background: #fffdf5
+        }
+
+        .card small {
+            display: block;
+            color: #536e7f;
+            margin-top: 5px;
+            font-size: 11px;
+            font-weight: 500
+        }
+
+        .pool {
+            background: #f4f8f9;
+            border: 1px dashed #b5c8d0;
+            border-radius: 10px;
+            padding: 9px;
+            min-height: 110px;
+            max-height: 330px;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 7px
+        }
+
+        .rank-fields {
+            padding: 0 9px 12px
+        }
+
+        .rank-fields label {
+            display: block;
+            margin: 8px 0 4px;
+            font-size: 12px;
+            color: #45616d
+        }
+
+        .status {
+            padding: 10px 13px;
+            border-radius: 8px;
+            background: #edf6f2;
+            color: #216654;
+            font-weight: 600;
+            margin-bottom: 12px
+        }
+
+        .rank-list {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px
+        }
+
+        .rank-item {
+            padding: 12px;
+            background: #f2f7fb;
+            border: 1px solid #c9dce7;
+            border-radius: 9px;
+            cursor: grab
+        }
+
+        .rank-item.over {
+            outline: 2px solid #168268
+        }
+
+        .rank-item b {
+            display: block;
+            color: #195975;
+            font-size: 12px;
+            margin-bottom: 8px
+        }
+
+        .rank-item .name {
+            color: #0d2136;
+            font-weight: 700;
+            font-size: 14px;
+            min-height: 35px;
+            overflow-wrap: anywhere
+        }
+
+        .rank-item .toolbar {
+            margin-bottom: 0
+        }
+
+        .rank-item button {
+            padding: 4px 10px
+        }
+
+        .bracket-scroll {
+            overflow: auto;
+            padding-bottom: 10px
+        }
+
+        .bracket {
+            min-width: 1040px;
+            display: grid;
+            grid-template-columns: 1fr 1.1fr 1.1fr 1.2fr;
+            gap: 18px
+        }
+
+        .round-title {
+            padding: 10px;
+            background: #123c51;
+            color: white;
+            border-radius: 8px;
+            font-weight: 700;
+            text-align: center
+        }
+
+        .match {
+            border: 1px solid #cbdbe2;
+            border-radius: 10px;
+            background: #f6f9fa;
+            padding: 10px;
+            margin-top: 12px
+        }
+
+        .match h3 {
+            font-size: 13px;
+            margin-bottom: 8px;
+            color: #235b66
+        }
+
+        .player {
+            display: block;
+            width: 100%;
+            text-align: left;
+            margin: 5px 0;
+            background: white;
+            color: #0d2136;
+            font-weight: 600;
+            min-height: 42px;
+            overflow-wrap: anywhere
+        }
+
+        .player.won {
+            background: #ddf3e8;
+            border-color: #278569;
+            color: #0b4a36;
+            font-weight: 700
+        }
+
+        .player.won:after {
+            content: " ✓";
+            color: #18744e
+        }
+
+        .source {
+            display: block;
+            font-size: 11px;
+            color: #536e7f;
+            font-weight: 500;
+            margin-top: 3px
+        }
+
+        .match-note {
+            font-size: 11px;
+            color: #6e8693;
+            margin-top: 6px
+        }
+
+        .semis .match:first-of-type {
+            margin-top: 65px
+        }
+
+        .semis .match:last-of-type {
+            margin-top: 100px
+        }
+
+        .finals .match:first-of-type {
+            margin-top: 112px
+        }
+
+        .finals .third {
+            margin-top: 30px;
+            border-color: #d9b05c
+        }
+
+        .champion {
+            padding: 15px;
+            background: #fff3cf;
+            border: 1px solid #e7cc82;
+            border-radius: 9px;
+            margin-top: 12px;
+            text-align: center;
+            font-weight: 700
+        }
+
+        .warning {
+            background: #fff6dd;
+            border: 1px solid #ead698;
+            padding: 12px;
+            border-radius: 9px;
+            color: #745b19;
+            line-height: 1.6;
+            margin-top: 15px
+        }
+
+        .foot {
+            color: #687f8c;
+            font-size: 12px;
+            margin-top: 12px
+        }
+
+        details summary {
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 10px
+        }
+
+        @media(max-width:1050px) {
+            .setup {
+                grid-template-columns: 1fr
+            }
+
+            .groups {
+                grid-template-columns: repeat(3, 1fr)
+            }
+
+            .rank-list {
+                grid-template-columns: repeat(3, 1fr)
+            }
+        }
+
+        @media(max-width:650px) {
+            .wrap {
+                padding: 10px
+            }
+
+            header {
+                padding: 20px
+            }
+
+            .groups,
+            .rank-list {
+                grid-template-columns: 1fr 1fr
+            }
+
+            .panel {
+                padding: 12px
+            }
+        }
+
+        @media print {
+            header {
+                background: white;
+                color: black
+            }
+
+            .setup>aside,
+            .toolbar,
+            details,
+            .hint,
+            .foot {
+                display: none
+            }
+
+            .wrap {
+                padding: 0
+            }
+
+            .panel {
+                break-inside: avoid
+            }
+
+            .bracket {
+                min-width: 0
+            }
+
+            .groups {
+                grid-template-columns: repeat(5, 1fr)
+            }
+
+            .rank-list {
+                grid-template-columns: repeat(5, 1fr)
+            }
+
+            button {
+                color: black
+            }
+
+            .bracket-scroll {
+                overflow: visible
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>⚽ Xếp bảng & nhánh thi đấu</h1>
+        <p>20 đội · 5 bảng · Chung kết và tranh hạng Ba · Chào mừng ngày Nhà giáo Việt Nam 20/11/2026</p>
+    </header>
+    <div class="wrap">
+        <section class="panel">
+            <h2>1. Kéo thả đội vào vòng bảng</h2>
+            <p class="hint">Kéo đội vào một ô của bảng. Thả vào ô đã có đội để đổi chỗ. Bạn cũng có thể nhấn chọn đội,
+                rồi nhấn ô đích. Mỗi bảng có 4 đội.</p>
+            <div id="status" class="status"></div>
+            <div class="setup">
+                <aside>
+                    <details open>
+                        <summary>Nhập danh sách 20 đội</summary>
+                        <textarea id="names" aria-label="Danh sách tên đội"
+                            placeholder="Mỗi dòng một tên đội"></textarea>
+                        <button class="primary" id="apply" style="margin-top:8px">Áp dụng danh sách</button>
+                        <p class="foot">Áp dụng danh sách mới sẽ xóa cách chia bảng và kết quả hiện tại.</p>
+                    </details>
+                    <div class="toolbar"><button id="shuffle">Chia bảng ngẫu nhiên</button><button id="unassign">Đưa về
+                            danh sách</button></div>
+                    <h3 style="margin:14px 0 8px">Đội chưa xếp bảng</h3>
+                    <div id="pool" class="pool" data-zone="pool"></div>
+                </aside>
+                <div id="groups" class="groups"></div>
+            </div>
+        </section>
+        <section class="panel">
+            <h2>2. Chọn kết quả vòng bảng và xếp hạng các đội nhì</h2>
+            <p class="hint">Chọn đội nhất, đội nhì ở từng bảng phía trên. Sau đó kéo thả các đội nhì dưới đây theo thứ
+                hạng thành tích từ 1 đến 5, hoặc dùng nút mũi tên. Hệ thống không tự tính thứ hạng từ điểm số.</p>
+            <div id="ranks" class="rank-list"></div>
+            <p class="foot">5 đội nhất bảng và đội nhì hạng 1 vào thẳng tứ kết. 4 đội nhì còn lại thi đấu play-off.</p>
+        </section>
+        <section class="panel">
+            <h2>3. Nhánh thi đấu đến chung kết và tranh hạng Ba</h2>
+            <p class="hint">Nhấn tên đội thắng ở mỗi trận để chuyển đội sang vòng tiếp theo. Đổi kết quả trận trước sẽ
+                xóa kết quả các trận phụ thuộc.</p>
+            <div class="bracket-scroll">
+                <div id="bracket" class="bracket"></div>
+            </div>
+            <div id="exception" class="warning"></div>
+            <div class="toolbar"><button id="clearResults">Xóa kết quả loại trực tiếp</button><button id="print">In sơ
+                    đồ</button></div>
+            <p id="saved" class="foot"></p>
+        </section>
+    </div>
+    <script>
+        (() => {
+            const letters = ["A", "B", "C", "D", "E"];
+            const key = "football-20teams-bracket-v1";
+            let state, selected = null, drag = null;
+            const initial = () => ({
+                teams: Array.from({ length: 20 }, (_, i) => ({ id: "team" + i, name: "Đội " + (i + 1) })),
+                groups: letters.map(() => [null, null, null, null]),
+                first: Array(5).fill(null), second: Array(5).fill(null),
+                order: [0, 1, 2, 3, 4], wins: {}
+            });
+            try { state = JSON.parse(localStorage.getItem(key)); if (!valid(state)) state = initial() } catch (e) { state = initial() }
+            function valid(s) {
+                if (!s || !Array.isArray(s.teams) || s.teams.length !== 20 || !s.teams.every(t => t && typeof t.id === "string" && typeof t.name === "string")) return false;
+                const ids = s.teams.map(t => t.id);
+                if (new Set(ids).size !== 20 || !Array.isArray(s.groups) || s.groups.length !== 5 || !s.groups.every(g => Array.isArray(g) && g.length === 4)) return false;
+                let assigned = s.groups.flat().filter(Boolean);
+                return assigned.every(id => ids.includes(id)) && new Set(assigned).size === assigned.length &&
+                    ["first", "second"].every(k => Array.isArray(s[k]) && s[k].length === 5) &&
+                    Array.isArray(s.order) && s.order.length === 5 && new Set(s.order).size === 5 && s.order.every(n => Number.isInteger(n) && n >= 0 && n < 5) && s.wins && typeof s.wins === "object";
+            }
+            const $ = id => document.getElementById(id);
+            function el(tag, cls, txt) { let n = document.createElement(tag); if (cls) n.className = cls; if (txt !== undefined) n.textContent = txt; return n }
+            function name(id) { return state.teams.find(t => t.id === id)?.name || "Chưa xác định" }
+            function save() {
+                try { localStorage.setItem(key, JSON.stringify(state)); $("saved").textContent = "Tự lưu trên trình duyệt này. Không đồng bộ sang thiết bị khác; nên in sơ đồ khi đã xếp xong." }
+                catch (e) { $("saved").textContent = "Trình duyệt hiện không cho phép lưu tự động. Giữ cửa sổ này mở hoặc in sơ đồ trước khi thoát." }
+            }
+            function resetStage() { state.wins = {} }
+            function cleanGroup(g) {
+                if (!state.groups[g].includes(state.first[g])) state.first[g] = null;
+                if (!state.groups[g].includes(state.second[g])) state.second[g] = null;
+                if (state.first[g] === state.second[g]) state.second[g] = null;
+            }
+            function locate(id) { for (let g = 0; g < 5; g++) { let s = state.groups[g].indexOf(id); if (s >= 0) return [g, s] } return null }
+            function move(id, zone, g, s) {
+                if (!state.teams.some(t => t.id === id)) return;
+                const origin = locate(id);
+                if (zone === "pool") { if (origin) state.groups[origin[0]][origin[1]] = null }
+                else {
+                    const displaced = state.groups[g][s];
+                    if (displaced === id) { selected = null; render(); return }
+                    if (origin) state.groups[origin[0]][origin[1]] = displaced;
+                    state.groups[g][s] = id;
+                }
+                for (let i = 0; i < 5; i++)cleanGroup(i);
+                selected = null; resetStage(); render();
+            }
+            function card(id) {
+                let c = el("div", "card" + (selected === id ? " selected" : ""), name(id));
+                c.draggable = true; c.dataset.team = id; c.tabIndex = 0; c.setAttribute("role", "button");
+                c.append(el("small", "", "⠿ Kéo thả hoặc nhấn chọn")); return c;
+            }
+            function picker(g, type, label) {
+                let box = el("div"); box.append(el("label", "", label));
+                let select = el("select"); select.setAttribute("aria-label", label + " bảng " + letters[g]);
+                let blank = el("option", "", "Chưa chọn"); blank.value = ""; select.append(blank);
+                state.groups[g].filter(Boolean).forEach(id => { let o = el("option", "", name(id)); o.value = id; select.append(o) });
+                select.value = state[type][g] || "";
+                select.onchange = () => {
+                    state[type][g] = select.value || null;
+                    const other = type === "first" ? "second" : "first";
+                    if (state[other][g] && state[other][g] === state[type][g]) state[other][g] = null;
+                    resetStage(); render();
+                };
+                box.append(select); return box;
+            }
+            function renderGroups() {
+                $("groups").replaceChildren(); $("pool").replaceChildren();
+                const used = new Set(state.groups.flat().filter(Boolean));
+                const remaining = state.teams.filter(t => !used.has(t.id));
+                remaining.forEach(t => $("pool").append(card(t.id)));
+                if (!remaining.length) $("pool").append(el("span", "", "Đã xếp đủ 20 đội. Thả vào đây để bỏ xếp bảng."));
+                letters.forEach((l, g) => {
+                    let group = el("div", "group"); group.append(el("h3", "", "Bảng " + l));
+                    let slots = el("div", "slots");
+                    state.groups[g].forEach((id, s) => {
+                        let slot = el("div", "slot", id ? undefined : "Thả đội vào vị trí " + (s + 1));
+                        slot.dataset.zone = "slot"; slot.dataset.group = g; slot.dataset.slot = s;
+                        slot.tabIndex = 0; slot.setAttribute("aria-label", "Vị trí " + (s + 1) + " bảng " + l);
+                        if (id) slot.append(card(id)); slots.append(slot);
+                    });
+                    group.append(slots);
+                    let fields = el("div", "rank-fields");
+                    fields.append(picker(g, "first", "Nhất bảng"), picker(g, "second", "Nhì bảng"));
+                    group.append(fields); $("groups").append(group);
+                });
+                $("status").textContent = "Đã xếp " + used.size + "/20 đội · Đã chọn kết quả " + letters.filter((_, g) => state.first[g] && state.second[g]).length + "/5 bảng" + (selected ? " · Đang chọn: " + name(selected) : "");
+            }
+            function renderRanks() {
+                $("ranks").replaceChildren();
+                state.order.forEach((g, i) => {
+                    let r = el("div", "rank-item"); r.draggable = true; r.dataset.rank = i;
+                    r.append(el("b", "", "Đội nhì hạng " + (i + 1)));
+                    r.append(el("div", "name", state.second[g] ? name(state.second[g]) : "Chưa chọn đội nhì"));
+                    r.append(el("small", "", "Nhì bảng " + letters[g]));
+                    let buttons = el("div", "toolbar");
+                    ["←", "→"].forEach((text, j) => {
+                        let b = el("button", "", text), to = i + (j === 0 ? -1 : 1);
+                        b.disabled = to < 0 || to >= 5; b.setAttribute("aria-label", j === 0 ? "Tăng thứ hạng" : "Giảm thứ hạng");
+                        b.onclick = () => reorder(i, to); buttons.append(b);
+                    });
+                    r.append(buttons); $("ranks").append(r);
+                });
+            }
+            function reorder(from, to) {
+                if (from === to) return; let g = state.order.splice(from, 1)[0]; state.order.splice(to, 0, g); resetStage(); render();
+            }
+            const deps = { play1: ["quarter1"], play2: ["quarter2"], quarter1: ["semi1"], quarter3: ["semi1"], quarter2: ["semi2"], quarter4: ["semi2"], semi1: ["final", "third"], semi2: ["final", "third"], final: [], third: [] };
+            function clearAfter(k) { (deps[k] || []).forEach(d => { delete state.wins[d]; clearAfter(d) }) }
+            function renderBracket() {
+                const ranked = state.order.map(g => state.second[g]);
+                const exception = state.order[0] === 2 && !!ranked[0];
+                let games = {};
+                function add(key, title, a, b, sa, sb) {
+                    if (state.wins[key] && state.wins[key] !== a && state.wins[key] !== b) { delete state.wins[key]; clearAfter(key) }
+                    games[key] = { key, title, a, b, sa, sb };
+                    return a && b ? state.wins[key] || null : null;
+                }
+                let p1 = add("play1", "Play-off 1", ranked[1], ranked[4], "Đội nhì hạng 2", "Đội nhì hạng 5");
+                let p2 = add("play2", "Play-off 2", ranked[2], ranked[3], "Đội nhì hạng 3", "Đội nhì hạng 4");
+                let q1 = add("quarter1", "Tứ kết 1", state.first[0], p1, "Nhất bảng A", "Thắng Play-off 1");
+                let q3 = add("quarter3", "Tứ kết 3", state.first[2], exception ? state.first[4] : ranked[0], "Nhất bảng C", exception ? "Nhất bảng E" : "Đội nhì hạng 1");
+                let q2 = add("quarter2", "Tứ kết 2", state.first[1], p2, "Nhất bảng B", "Thắng Play-off 2");
+                let q4 = add("quarter4", "Tứ kết 4", state.first[3], exception ? ranked[0] : state.first[4], "Nhất bảng D", exception ? "Đội nhì hạng 1" : "Nhất bảng E");
+                let s1 = add("semi1", "Bán kết 1", q1, q3, "Thắng Tứ kết 1", "Thắng Tứ kết 3");
+                let s2 = add("semi2", "Bán kết 2", q2, q4, "Thắng Tứ kết 2", "Thắng Tứ kết 4");
+                let champion = add("final", "Chung kết", s1, s2, "Thắng Bán kết 1", "Thắng Bán kết 2");
+                function loser(k) { let m = games[k], w = state.wins[k]; return m.a && m.b && w ? (w === m.a ? m.b : m.a) : null }
+                let third = add("third", "Tranh hạng Ba", loser("semi1"), loser("semi2"), "Thua Bán kết 1", "Thua Bán kết 2");
+                $("bracket").replaceChildren();
+                const columns = [
+                    ["Vòng play-off", ["play1", "play2"], ""],
+                    ["Vòng tứ kết", ["quarter1", "quarter3", "quarter2", "quarter4"], ""],
+                    ["Vòng bán kết", ["semi1", "semi2"], "semis"],
+                    ["Chung kết và tranh hạng Ba", ["final", "third"], "finals"]
+                ];
+                columns.forEach(([title, keys, cls]) => {
+                    let col = el("div", cls); col.append(el("div", "round-title", title));
+                    keys.forEach(k => {
+                        let m = games[k], box = el("div", "match" + (k === "third" ? " third" : ""));
+                        box.append(el("h3", "", m.title));
+                        [[m.a, m.sa], [m.b, m.sb]].forEach(([id, source]) => {
+                            let button = el("button", "player" + (id && state.wins[k] === id ? " won" : ""), id ? name(id) : source);
+                            button.disabled = !(m.a && m.b);
+                            if (id) button.append(el("span", "source", source));
+                            button.onclick = () => {
+                                if (state.wins[k] === id) delete state.wins[k]; else state.wins[k] = id;
+                                clearAfter(k); render();
+                            };
+                            box.append(button);
+                        });
+                        box.append(el("div", "match-note", k === "third" ? "Hai đội thua bán kết · Theo kế hoạch của Ban Tổ chức" : "Chọn đội thắng → vòng tiếp theo"));
+                        col.append(box);
+                        if (k === "final") col.append(el("div", "champion", "🏆 Vô địch: " + (champion ? name(champion) : "Chưa xác định")));
+                        if (k === "third" && third) col.append(el("div", "champion", "🥉 Hạng Ba: " + name(third)));
+                    }); $("bracket").append(col);
+                });
+                $("exception").textContent = exception ?
+                    "Đang áp dụng đổi cặp vì đội nhì hạng 1 thuộc Bảng C: Tứ kết 3 = Nhất bảng C – Nhất bảng E; Tứ kết 4 = Nhất bảng D – Đội nhì hạng 1. Các nhánh bán kết giữ nguyên." :
+                    "Theo điều lệ: nếu đội nhì hạng 1 thuộc Bảng C, tự động đổi cặp Tứ kết 3 thành Nhất bảng C – Nhất bảng E và Tứ kết 4 thành Nhất bảng D – Đội nhì hạng 1.";
+            }
+            function render() { renderGroups(); renderRanks(); renderBracket(); save() }
+            $("names").value = state.teams.map(t => t.name).join("\n");
+            $("apply").onclick = () => {
+                let names = $("names").value.split(/\r?\n/).map(n => n.trim()).filter(Boolean);
+                if (names.length !== 20) { alert("Vui lòng nhập đúng 20 tên đội, mỗi dòng một đội. Hiện có " + names.length + " đội."); return }
+                if (new Set(names.map(n => n.toLocaleLowerCase("vi"))).size !== 20) { alert("Có tên đội trùng nhau. Hãy thêm tên lớp hoặc mã đội để phân biệt."); return }
+                state = initial(); state.teams = names.map((name, i) => ({ id: "team" + i, name })); selected = null; render();
+            };
+            $("shuffle").onclick = () => {
+                const ids = state.teams.map(t => t.id);
+                for (let i = ids.length - 1; i > 0; i--) { let j = Math.floor(Math.random() * (i + 1));[ids[i], ids[j]] = [ids[j], ids[i]] }
+                state.groups = letters.map((_, g) => ids.slice(g * 4, g * 4 + 4));
+                state.first.fill(null); state.second.fill(null); state.order = [0, 1, 2, 3, 4]; resetStage(); selected = null; render();
+            };
+            $("unassign").onclick = () => { state.groups = letters.map(() => [null, null, null, null]); state.first.fill(null); state.second.fill(null); resetStage(); selected = null; render() };
+            $("clearResults").onclick = () => { resetStage(); render() };
+            $("print").onclick = () => window.print();
+            document.addEventListener("click", e => {
+                let c = e.target.closest("[data-team]"), slot = e.target.closest("[data-zone]");
+                if (c) {
+                    if (selected && selected !== c.dataset.team && slot?.dataset.zone === "slot") move(selected, "slot", +slot.dataset.group, +slot.dataset.slot);
+                    else { selected = selected === c.dataset.team ? null : c.dataset.team; render() }
+                } else if (slot && selected) move(selected, slot.dataset.zone, +slot.dataset.group, +slot.dataset.slot);
+            });
+            document.addEventListener("keydown", e => {
+                if (e.key === "Escape") { selected = null; render() }
+                if (e.key === "Enter" || e.key === " ") {
+                    const item = e.target.closest("[data-team],[data-zone='slot']");
+                    if (item && e.target === item) { e.preventDefault(); item.click() }
+                }
+            });
+            document.addEventListener("dragstart", e => {
+                let c = e.target.closest("[data-team]"), r = e.target.closest("[data-rank]");
+                if (c) drag = { type: "team", id: c.dataset.team };
+                else if (r) drag = { type: "rank", index: +r.dataset.rank }; else return;
+                e.dataTransfer.setData("text/plain", JSON.stringify(drag)); e.dataTransfer.effectAllowed = "move";
+            });
+            document.addEventListener("dragover", e => {
+                let z = e.target.closest("[data-zone]"), r = e.target.closest("[data-rank]");
+                if (drag && ((drag.type === "team" && z) || (drag.type === "rank" && r))) { e.preventDefault(); e.dataTransfer.dropEffect = "move" }
+            });
+            document.addEventListener("dragenter", e => {
+                let target = e.target.closest(drag?.type === "rank" ? "[data-rank]" : "[data-zone]");
+                if (target && drag) target.classList.add("over");
+            });
+            document.addEventListener("dragleave", e => {
+                let target = e.target.closest("[data-zone],[data-rank]");
+                if (target && !target.contains(e.relatedTarget)) target.classList.remove("over");
+            });
+            document.addEventListener("drop", e => {
+                let z = e.target.closest("[data-zone]"), r = e.target.closest("[data-rank]");
+                if (!drag) return; e.preventDefault();
+                if (drag.type === "team" && z) move(drag.id, z.dataset.zone, +z.dataset.group, +z.dataset.slot);
+                if (drag.type === "rank" && r) reorder(drag.index, +r.dataset.rank);
+                drag = null; document.querySelectorAll(".over").forEach(n => n.classList.remove("over"));
+            });
+            document.addEventListener("dragend", () => { drag = null; document.querySelectorAll(".over").forEach(n => n.classList.remove("over")) });
+            render();
+        })();
+    </script>
+</body>
+
+</html>
